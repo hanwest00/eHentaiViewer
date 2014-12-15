@@ -6,11 +6,10 @@ import com.hx.android.ehentai.data.ComicManager.OnLoadComicPageUrlBegin;
 import com.hx.android.ehentai.data.ComicManager.OnLoadComicPageUrlEnd;
 import com.hx.android.ehentai.model.Comic;
 import com.hx.android.ehentai.net.ImageLoader;
-import android.os.Build;
 import android.os.Bundle;
-import android.annotation.TargetApi;
 import android.app.Activity;
 import android.app.ProgressDialog;
+import android.support.v7.app.ActionBarActivity;
 import android.util.DisplayMetrics;
 import android.view.MotionEvent;
 import android.view.View;
@@ -20,7 +19,7 @@ import android.widget.ImageView.ScaleType;
 import android.widget.LinearLayout;
 import android.widget.ScrollView;
 
-public class ViewerActivity extends Activity {
+public class ViewerActivity extends ActionBarActivity {
 
 	private ScrollView mScrollView;
 	private LinearLayout mLinearLayout;
@@ -28,14 +27,13 @@ public class ViewerActivity extends Activity {
 	private int mCurrLoad;
 	private List<String> mImageUrls;
 	private LinearLayout.LayoutParams imageLayoutParams;
+	private DisplayMetrics screenDM;
 
-	@TargetApi(Build.VERSION_CODES.HONEYCOMB)
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_viewer);
-		if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB)
-			this.getActionBar().hide();
+		this.getActionBar().hide();
 		mComic = (Comic) this.getIntent().getSerializableExtra("comic");
 		mCurrLoad = 0;
 		initView();
@@ -45,10 +43,10 @@ public class ViewerActivity extends Activity {
 		mScrollView = (ScrollView) this.findViewById(R.id.viewr_main_scroll);
 		mLinearLayout = (LinearLayout) this.findViewById(R.id.viewr_main);
 
-		DisplayMetrics dm = new DisplayMetrics();
-		this.getWindowManager().getDefaultDisplay().getMetrics(dm);
-		imageLayoutParams = new LinearLayout.LayoutParams(dm.widthPixels,
-				dm.heightPixels);
+		screenDM = new DisplayMetrics();
+		this.getWindowManager().getDefaultDisplay().getMetrics(screenDM);
+		imageLayoutParams = new LinearLayout.LayoutParams(screenDM.widthPixels,
+				LinearLayout.LayoutParams.WRAP_CONTENT);
 		final ProgressDialog dialog = new ProgressDialog(ViewerActivity.this);
 		dialog.setTitle("Load Pages");
 		dialog.setMessage("Loading");
@@ -103,10 +101,11 @@ public class ViewerActivity extends Activity {
 			return;
 		String url = mImageUrls.get(mCurrLoad);
 		ImageView imageView = new ImageView(this);
-		imageView.setScaleType(ScaleType.FIT_XY);
+		//imageView.setScaleType(ScaleType.FIT_XY);
 		imageView.setLayoutParams(imageLayoutParams);
 		this.mLinearLayout.addView(imageView);
-		ImageLoader.getInstance().ShowImageAsync(imageView, url);
+		ImageLoader.getInstance().ShowImageAsync(imageView, url,
+				screenDM.widthPixels, screenDM.heightPixels);
 		mCurrLoad++;
 	}
 }

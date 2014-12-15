@@ -8,19 +8,9 @@
     android:paddingTop="@dimen/activity_vertical_margin"
     tools:context=".MainActivity" >
 
-    <ListView
-        android:id="@+id/main_list"
+    <android.support.v4.view.ViewPager
+        android:id="@+id/main_pager"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:layout_alignParentTop="true" >
-    </ListView>
-
-    <Button
-        android:id="@+id/more"
-        android:layout_width="match_parent"
-        android:layout_height="40dip"
-        android:layout_alignParentBottom="true"
-        android:text="MORE"
-         />
+        android:layout_height="match_parent" />
 
 </RelativeLayout>

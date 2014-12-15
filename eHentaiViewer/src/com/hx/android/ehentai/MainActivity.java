@@ -3,19 +3,29 @@ package com.hx.android.ehentai;
 import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 
 import com.hx.android.ehentai.adapter.ComicListAdapter;
 import com.hx.android.ehentai.data.ComicManager;
 import com.hx.android.ehentai.data.ComicManager.OnGetMoreComicEnd;
 import com.hx.android.ehentai.model.Comic;
+import com.hx.android.ehentai.widget.ImageQuatilyActionProvider;
+import com.hx.android.ehentai.widget.ImageQuatilyActionProvider.OnQuatilyChangeListener;
+import com.hx.android.ehentai.widget.ImageQuatilyActionProvider.OnQuatilyChangedListener;
 
-import android.os.Build;
 import android.os.Bundle;
-import android.annotation.TargetApi;
-import android.app.ActionBar;
-import android.app.Activity;
 import android.app.ProgressDialog;
 import android.content.Intent;
+import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentManager;
+import android.support.v4.app.FragmentPagerAdapter;
+import android.support.v4.app.FragmentTransaction;
+import android.support.v4.view.MenuItemCompat;
+import android.support.v4.view.ViewPager;
+import android.support.v7.app.ActionBar;
+import android.support.v7.app.ActionBar.Tab;
+import android.support.v7.app.ActionBar.TabListener;
+import android.support.v7.app.ActionBarActivity;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -25,79 +35,56 @@ import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.Button;
 import android.widget.ListView;
-import android.widget.Toast;
 
-@TargetApi(Build.VERSION_CODES.HONEYCOMB)
-public class MainActivity extends Activity {
-	private ListView comicListView;
-	private ComicListAdapter mAdapter;
-	private Button moreBtn;
-	private List<Comic> mCommics;
+public class MainActivity extends ActionBarActivity implements TabListener,
+		OnQuatilyChangeListener, OnQuatilyChangedListener {
+
+	private ViewPager mViewPager;
+	private SectionsPagerAdapter mSectionsPagerAdapter;
+	private ProgressDialog progressDialog;
+	private ActionBar mActionBar;
+	private MenuItem mQuatilyItem;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_main);
 		setOverflowShowingAlways();
-
 		initViews();
 	}
 
 	private void initViews() {
-		moreBtn = (Button) this.findViewById(R.id.more);
-		comicListView = (ListView) this.findViewById(R.id.main_list);
-		final ComicManager comicMan = new ComicManager(this);
-		comicMan.beginGetMoreComic();
-		final ProgressDialog dialog = ProgressDialog.show(this, "Hentai",
-				"Loading");
-		comicMan.setOnGetMoreComicEnd(new OnGetMoreComicEnd() {
 
-			@Override
-			public void getMoreComicEnd(List<Comic> commics) {
-				// TODO Auto-generated method stub
-				if (mCommics == null)
-					mCommics = new ArrayList<Comic>();
-				mCommics.addAll(commics);
-				if (mAdapter == null) {
-					mAdapter = new ComicListAdapter(mCommics, MainActivity.this);
-					comicListView.setAdapter(mAdapter);
-				}else{
-					mAdapter.notifyDataSetChanged();
-				}
-				
-				dialog.dismiss();
-			}
-		});
+		mActionBar = this.getSupportActionBar();
+		mActionBar.setNavigationMode(ActionBar.NAVIGATION_MODE_TABS);
+		mActionBar.setTitle("Comic");
+		mActionBar.setDisplayHomeAsUpEnabled(false);
 
-		moreBtn.setOnClickListener(new OnClickListener() {
+		mSectionsPagerAdapter = new SectionsPagerAdapter(
+				getSupportFragmentManager());
+		mViewPager = (ViewPager) this.findViewById(R.id.main_pager);
+		mViewPager.setAdapter(mSectionsPagerAdapter);
+		mViewPager
+				.setOnPageChangeListener(new ViewPager.SimpleOnPageChangeListener() {
+					@Override
+					public void onPageSelected(int position) {
+						mActionBar.setSelectedNavigationItem(position);
+					}
+				});
 
-			@Override
-			public void onClick(View arg0) {
-				// TODO Auto-generated method stub
-				comicMan.beginGetMoreComic();
-				dialog.show();
-			}
+		// For each of the sections in the app, add a tab to the action bar.
+		for (int i = 0; i < mSectionsPagerAdapter.getCount(); i++) {
+			Tab tab = mActionBar.newTab()
+					.setText(mSectionsPagerAdapter.getPageTitle(i))
+					.setTabListener(this);
+			mActionBar.addTab(tab);
+		}
 
-		});
-		
-		comicListView.setOnItemClickListener(new OnItemClickListener(){
-			@Override
-			public void onItemClick(AdapterView<?> parent, View view,
-					int position, long id) {
-				// TODO Auto-generated method stub
-				Intent intent = new Intent(MainActivity.this, ViewerActivity.class);
-				intent.putExtra("comic", mCommics.get(position));
-				startActivity(intent);
-			}
-		});
 	}
 
 	@Override
 	protected void onStart() {
 		super.onStart();
-		ActionBar actionBar = this.getActionBar();
-		actionBar.setTitle("Comic List");
-		actionBar.setDisplayHomeAsUpEnabled(false);
 	}
 
 	private void setOverflowShowingAlways() {
@@ -116,6 +103,12 @@ public class MainActivity extends Activity {
 	public boolean onCreateOptionsMenu(Menu menu) {
 		// Inflate the menu; this adds items to the action bar if it is present.
 		getMenuInflater().inflate(R.menu.main, menu);
+		mQuatilyItem = menu.findItem(R.id.action_provider);
+		mQuatilyItem.setVisible(false);
+		ImageQuatilyActionProvider actionProvider = (ImageQuatilyActionProvider) MenuItemCompat
+				.getActionProvider(mQuatilyItem);
+		actionProvider.setOnQuatilyChangeListener(this);
+		actionProvider.setOnQuatilyChangedListener(this);
 		return true;
 	}
 
@@ -138,4 +131,100 @@ public class MainActivity extends Activity {
 		return true;
 	}
 
+	@Override
+	public void change() {
+		if (progressDialog == null)
+			progressDialog = ProgressDialog.show(this, "Change", "Loading");
+	}
+
+	@Override
+	public void changed(List<Comic> comics) {
+		// TODO Auto-generated method stub
+		mSectionsPagerAdapter.changeFragmentData(comics);
+		progressDialog.dismiss();
+	}
+
+	@Override
+	public void onTabReselected(Tab arg0, FragmentTransaction arg1) {
+		// TODO Auto-generated method stub
+
+	}
+
+	@Override
+	public void onTabSelected(Tab arg0, FragmentTransaction arg1) {
+		// TODO Auto-generated method stub
+		if (mQuatilyItem == null)
+			return;
+		if (arg0.getPosition() == 1) {
+			mQuatilyItem.setVisible(true);
+			OnlineComicFragment curr = (OnlineComicFragment) mSectionsPagerAdapter.getCurrentFragment();
+			if(curr.isDataEmpty())
+				curr.loadOnlineComic();
+		} else
+			mQuatilyItem.setVisible(false);
+
+		mViewPager.setCurrentItem(arg0.getPosition());
+	}
+
+	@Override
+	public void onTabUnselected(Tab arg0, FragmentTransaction arg1) {
+		// TODO Auto-generated method stub
+
+	}
+
+	public class SectionsPagerAdapter extends FragmentPagerAdapter {
+		private IChangeData mIChangeData;
+
+		public SectionsPagerAdapter(FragmentManager fm) {
+
+			super(fm);
+		}
+
+		public void changeFragmentData(List<Comic> comics) {
+			mIChangeData.changeData(comics);
+		}
+
+		@Override
+		public Fragment getItem(int position) {
+			// getItem is called to instantiate the fragment for the given page.
+			// Return a DummySectionFragment (defined as a static inner class
+			// below) with the page number as its lone argument.
+			switch (position) {
+			case 0:
+				LocalComicFragment lf = new LocalComicFragment();
+				mIChangeData = lf;
+				return lf;
+			case 1:
+				OnlineComicFragment of = new OnlineComicFragment();
+				mIChangeData = of;
+				return of;
+			default:
+				return null;
+			}
+		}
+
+		public Fragment getCurrentFragment() {
+			return (Fragment) mIChangeData;
+		}
+
+		@Override
+		public int getCount() {
+			// Show 2 total pages.
+			return 2;
+		}
+
+		@Override
+		public CharSequence getPageTitle(int position) {
+			Locale l = Locale.getDefault();
+
+			switch (position) {
+			case 0:
+				return getString(R.string.title_local).toUpperCase(l);
+			case 1:
+				return getString(R.string.title_online).toUpperCase(l);
+			}
+			return null;
+
+		}
+	}
 }

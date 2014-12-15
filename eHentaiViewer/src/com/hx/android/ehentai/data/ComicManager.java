@@ -20,6 +20,10 @@ public class ComicManager {
 	public ComicManager(Context context) {
 		mWebManager = new WebManager(context);
 	}
+	
+	public void firstPageStart(boolean val){
+		if(val) mWebManager.setPage(0);
+	}
 
 	public void beginGetMoreComic() {
 		LoadComicAsyncTask asyncTask = new LoadComicAsyncTask();

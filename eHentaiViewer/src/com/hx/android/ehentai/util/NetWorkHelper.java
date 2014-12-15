@@ -115,7 +115,7 @@ public final class NetWorkHelper {
 		}
 	}
 
-	public static void httpRequestFile(String url, File file) {
+	public static boolean httpRequestFile(String url, File file) {
 		if (!(url.startsWith("http://") || url.startsWith("https://")
 				|| url.startsWith("HTTP://") || url.startsWith("HTTPs://"))) {
 			url = "http://" + url;
@@ -141,12 +141,15 @@ public final class NetWorkHelper {
 
 			inputStream.close();
 			outStream.close();
+			return true;
 		} catch (MalformedURLException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
+			return false;
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
+			return false;
 		} finally {
 			conn.disconnect();
 		}

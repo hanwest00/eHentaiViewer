@@ -1,12 +1,12 @@
-<menu xmlns:android="http://schemas.android.com/apk/res/android" >
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:eHentai="http://schemas.android.com/apk/res-auto" >
 
     <item
-        android:id="@+id/action_search"
-        android:actionViewClass="android.widget.SearchView"
-        android:icon="@android:drawable/ic_menu_search"
+        android:id="@+id/action_provider"
         android:orderInCategory="1"
-        android:showAsAction="ifRoom|collapseActionView"
-        android:title="Search"/>
+        android:title="Quatily"
+        eHentai:actionProviderClass="com.hx.android.ehentai.widget.ImageQuatilyActionProvider"
+        eHentai:showAsAction="ifRoom|withText"/>
     <item
         android:id="@+id/action_settings"
         android:icon="@drawable/ic_launcher"
