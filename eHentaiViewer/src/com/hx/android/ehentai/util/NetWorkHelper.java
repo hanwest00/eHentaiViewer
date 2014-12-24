@@ -86,7 +86,7 @@ public final class NetWorkHelper {
 			url = "http://" + url;
 		}
 		HttpURLConnection conn = null;
-
+		java.io.ByteArrayOutputStream bao = new java.io.ByteArrayOutputStream();
 		try {
 			URL getIPUrl = new URL(url);
 			conn = (HttpURLConnection) getIPUrl.openConnection();
@@ -95,13 +95,16 @@ public final class NetWorkHelper {
 			conn.setConnectTimeout(3000);
 
 			InputStream inputStream = conn.getInputStream();
-			java.io.BufferedInputStream buffered = new java.io.BufferedInputStream(
-					inputStream);
-			int len = buffered.available();
-			byte[] buffer = new byte[len];
-			buffered.read(buffer);
-			buffered.close();
-			return buffer;
+			
+			
+			byte[] buffer = new byte[65530];
+			
+			int len = 0;
+			while((len = inputStream.read(buffer)) > 0){
+				bao.write(buffer, 0, len);
+			}
+			inputStream.close();
+			return bao.toByteArray();
 		} catch (MalformedURLException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();

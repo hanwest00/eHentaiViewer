@@ -19,9 +19,6 @@ import android.widget.LinearLayout;
 
 public class ImageLoader {
 
-	private boolean stop;
-	private Map<ImageView, String> loadList;
-
 	private static ImageLoader instance;
 
 	public static ImageLoader getInstance() {
@@ -32,9 +29,6 @@ public class ImageLoader {
 
 	private ImageLoader() {
 		FileManager.createDir(Path.LAZY_LOAD_PATH);
-		FileManager.createDir(Path.CACHE_PATH);
-		stop = false;
-		loadList = new LinkedHashMap<ImageView, String>();
 	}
 
 	public void clearCache() {
@@ -52,20 +46,19 @@ public class ImageLoader {
 	public void ShowImageAsync(ImageView imageView, String imgUrl, int w, int h) {
 		File f = new File(Path.LAZY_LOAD_PATH
 				+ String.valueOf(imgUrl.hashCode()));
-		if (!f.exists())
+		if (!f.exists()) {
 			new AsyncLoadImage(imageView, imgUrl, f, w, h).execute();
-		else
-			setImageAndAutoSize(imageView, FileManager.convertToBitmap(f.getPath(),
-					w, h));
+		} else
+			setImageAndAutoSize(imageView,
+					FileManager.convertToBitmap(f.getPath(), w, h));
 	}
-	
-	private void setImageAndAutoSize(ImageView imageView, Bitmap src)
-	{
-		/*if(src == null) return;
-		LayoutParams lp = imageView.getLayoutParams();
-		lp.height = src.getHeight();
-		lp.width = src.getWidth();
-		imageView.setLayoutParams(lp);*/
+
+	private void setImageAndAutoSize(ImageView imageView, Bitmap src) {
+		/*
+		 * if(src == null) return; LayoutParams lp =
+		 * imageView.getLayoutParams(); lp.height = src.getHeight(); lp.width =
+		 * src.getWidth(); imageView.setLayoutParams(lp);
+		 */
 		imageView.setImageBitmap(src);
 	}
 
@@ -88,15 +81,16 @@ public class ImageLoader {
 
 		@Override
 		protected Void doInBackground(Void... params) {
-			if(!NetWorkHelper.httpRequestFile(mImgUrl, mFile))
+			if (!NetWorkHelper.httpRequestFile(mImgUrl, mFile))
 				NetWorkHelper.httpRequestFile(mImgUrl, mFile);
 			return null;
 		}
 
 		@Override
 		protected void onPostExecute(Void result) {
-			setImageAndAutoSize(mImageView, FileManager.convertToBitmap(
-					mFile.getPath(), mWidth, mHeight));
+			if (mImgUrl.equals(String.valueOf(mImageView.getTag())))
+				setImageAndAutoSize(mImageView, FileManager.convertToBitmap(
+						mFile.getPath(), mWidth, mHeight));
 		}
 
 	}

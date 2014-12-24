@@ -27,7 +27,7 @@ import com.hx.android.ehentai.model.Comic;
 public class OnlineComicFragment extends Fragment implements IChangeData {
 	private View mRootView;
 	private PullToRefreshListView mListView;
-	private List<Comic> mCommics;
+	private List<Comic> mComics;
 	private ComicListAdapter mAdapter;
 	private ComicManager mComicMan;
 	private ProgressDialog mDialog;
@@ -57,11 +57,11 @@ public class OnlineComicFragment extends Fragment implements IChangeData {
 			@Override
 			public void getMoreComicEnd(List<Comic> commics) {
 				// TODO Auto-generated method stub
-				if (mCommics == null)
-					mCommics = new ArrayList<Comic>();
-				mCommics.addAll(commics);
+				if (mComics == null)
+					mComics = new ArrayList<Comic>();
+				mComics.addAll(commics);
 				if (mAdapter == null) {
-					mAdapter = new ComicListAdapter(mCommics, getActivity());
+					mAdapter = new ComicListAdapter(mComics, getActivity());
 					mListView.setAdapter(mAdapter);
 				} else {
 					mAdapter.notifyDataSetChanged();
@@ -82,7 +82,7 @@ public class OnlineComicFragment extends Fragment implements IChangeData {
 					public void onPullDownToRefresh(
 							PullToRefreshBase refreshView) {
 						mComicMan.firstPageStart(true);
-						mCommics.clear();
+						mComics.clear();
 						mComicMan.beginGetMoreComic();
 						mDialog.show();
 					}
@@ -101,7 +101,7 @@ public class OnlineComicFragment extends Fragment implements IChangeData {
 					int position, long id) {
 				// TODO Auto-generated method stub
 				Intent intent = new Intent(getActivity(), ViewerActivity.class);
-				intent.putExtra("comic", mCommics.get(position));
+				intent.putExtra("comic", mComics.get(position - 1));
 				startActivity(intent);
 			}
 		});
@@ -111,7 +111,7 @@ public class OnlineComicFragment extends Fragment implements IChangeData {
 	
 	public boolean isDataEmpty()
 	{
-		return mCommics == null || mCommics.size() == 0;
+		return mComics == null || mComics.size() == 0;
 	}
 
 	public void loadOnlineComic() {
@@ -121,7 +121,7 @@ public class OnlineComicFragment extends Fragment implements IChangeData {
 
 	@Override
 	public void changeData(List<Comic> comics) {
-		mCommics = comics;
+		mComics = comics;
 		mAdapter.notifyDataSetChanged();
 	}
 

@@ -44,6 +44,7 @@ public class MainActivity extends ActionBarActivity implements TabListener,
 	private ProgressDialog progressDialog;
 	private ActionBar mActionBar;
 	private MenuItem mQuatilyItem;
+	private MenuItem mEditItem;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -105,6 +106,7 @@ public class MainActivity extends ActionBarActivity implements TabListener,
 		getMenuInflater().inflate(R.menu.main, menu);
 		mQuatilyItem = menu.findItem(R.id.action_provider);
 		mQuatilyItem.setVisible(false);
+		mEditItem = menu.findItem(R.id.action_edit);
 		ImageQuatilyActionProvider actionProvider = (ImageQuatilyActionProvider) MenuItemCompat
 				.getActionProvider(mQuatilyItem);
 		actionProvider.setOnQuatilyChangeListener(this);
@@ -118,8 +120,9 @@ public class MainActivity extends ActionBarActivity implements TabListener,
 		case R.id.action_settings:
 
 			return false;
-		case R.id.setting:
-
+		case R.id.action_edit:
+			LocalComicFragment fragment = (LocalComicFragment) mSectionsPagerAdapter.getCurrentFragment1();
+			fragment.startEdit();
 			break;
 		case R.id.quit:
 
@@ -157,11 +160,15 @@ public class MainActivity extends ActionBarActivity implements TabListener,
 			return;
 		if (arg0.getPosition() == 1) {
 			mQuatilyItem.setVisible(true);
-			OnlineComicFragment curr = (OnlineComicFragment) mSectionsPagerAdapter.getCurrentFragment();
-			if(curr.isDataEmpty())
+			mEditItem.setVisible(false);
+			OnlineComicFragment curr = (OnlineComicFragment) mSectionsPagerAdapter
+					.getCurrentFragment();
+			if (curr.isDataEmpty())
 				curr.loadOnlineComic();
-		} else
+		} else {
 			mQuatilyItem.setVisible(false);
+			mEditItem.setVisible(true);
+		}
 
 		mViewPager.setCurrentItem(arg0.getPosition());
 	}
@@ -174,6 +181,7 @@ public class MainActivity extends ActionBarActivity implements TabListener,
 
 	public class SectionsPagerAdapter extends FragmentPagerAdapter {
 		private IChangeData mIChangeData;
+		private IChangeData mIChangeData1;
 
 		public SectionsPagerAdapter(FragmentManager fm) {
 
@@ -192,7 +200,7 @@ public class MainActivity extends ActionBarActivity implements TabListener,
 			switch (position) {
 			case 0:
 				LocalComicFragment lf = new LocalComicFragment();
-				mIChangeData = lf;
+				mIChangeData1 = lf;
 				return lf;
 			case 1:
 				OnlineComicFragment of = new OnlineComicFragment();
@@ -205,6 +213,10 @@ public class MainActivity extends ActionBarActivity implements TabListener,
 
 		public Fragment getCurrentFragment() {
 			return (Fragment) mIChangeData;
+		}
+		
+		public Fragment getCurrentFragment1() {
+			return (Fragment) mIChangeData1;
 		}
 
 		@Override

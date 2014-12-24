@@ -1,6 +1,9 @@
 package com.hx.android.ehentai.net;
 
+import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.regex.Matcher;
@@ -10,6 +13,7 @@ import java.util.zip.ZipEntry;
 import android.content.Context;
 
 import com.hx.android.ehentai.model.Comic;
+import com.hx.android.ehentai.util.FileManager;
 import com.hx.android.ehentai.util.NetWorkHelper;
 
 public class WebManager {
@@ -17,7 +21,10 @@ public class WebManager {
 	private Context mContext;
 	private String mContent;
 	private int mPage;
-	private ImageLoader imageLoader;
+	private boolean cachePage;
+	private String cacheDir;
+	private File cacheIndexFile;
+	private String imageUrlCacheDir;
 
 	public enum ImageQuality {
 		X420, X780, X980
@@ -43,9 +50,25 @@ public class WebManager {
 			.compile("(?<=<div id=\"sd\">\n<a href=\")[\\S\\s]*(?=\"><img id=\"sm\")");
 
 	public WebManager(Context context) {
-		context = mContext;
+		mContext = context;
 		mPage = 0;
-		imageLoader = ImageLoader.getInstance();
+		cachePage = false;
+		cacheDir = context.getCacheDir().getAbsolutePath();
+		imageUrlCacheDir = String.format("%s/ImageUrlCache/", context
+				.getFilesDir().getAbsolutePath());
+		try {
+			cacheIndexFile = new File(String.format("%scacheIdx", context
+					.getCacheDir().getAbsolutePath()));
+			if (!cacheIndexFile.exists())
+				cacheIndexFile.createNewFile();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	}
+
+	public void setCachePageOn(boolean open) {
+		cachePage = open;
 	}
 
 	public void setImageQuality(ImageQuality imageQuality) {
@@ -75,6 +98,27 @@ public class WebManager {
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
+	}
+
+	public void getAllImageUrlAndCache(String startPage,
+			List<String> imageUrlList) {
+		File cache = new File(imageUrlCacheDir + startPage.hashCode());
+		if (cache.exists()) {
+			String content = FileManager.readAllText(cache, "utf-8").trim();
+			if (content == null || "".equals(content))
+				return;
+			String[] urlList = content.substring(1, content.length() - 1)
+					.split(", ");
+			if (urlList.length > 0) {
+				imageUrlList.addAll(Arrays.asList(urlList));
+				return;
+			}
+		}
+
+		this.getAllImageUrl(startPage, imageUrlList);
+
+		FileManager.writeAllText(cache,
+				Arrays.toString(imageUrlList.toArray()), "utf-8");
 	}
 
 	public void getAllImageUrl(String startPage, List<String> imageUrlList) {
@@ -177,5 +221,31 @@ public class WebManager {
 
 	public void cacheComic(String link, String savePath) {
 
+	}
+
+	/*
+	 * cahce index format: HashCode,start,end,CahceFileName\n
+	 */
+	private String getCache(String url) {
+		String ret = null;
+		String urlHashCode = String.valueOf(url.hashCode());
+		String indexStr = FileManager.readAllText(cacheIndexFile, "utf-8");
+		int start = indexStr.indexOf(urlHashCode);
+		if (start > 0) {
+			indexStr = indexStr.substring(start, indexStr.length());
+			int end = indexStr.indexOf("\n");
+			if (end > 0) {
+				String line = indexStr.substring(0, end);
+				if (line != null && !"".equals(line)) {
+					String[] arr = line.split(",");
+					if (arr.length == 4)
+						ret = FileManager.readAllText(arr[3], "utf-8")
+								.substring(Integer.valueOf(arr[1]),
+										Integer.valueOf(arr[2]));
+				}
+			}
+		}
+
+		return ret;
 	}
 }

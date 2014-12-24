@@ -8,13 +8,13 @@
         eHentai:actionProviderClass="com.hx.android.ehentai.widget.ImageQuatilyActionProvider"
         eHentai:showAsAction="ifRoom|withText"/>
     <item
-        android:id="@+id/action_settings"
+        android:id="@+id/action_edit"
         android:icon="@drawable/ic_launcher"
         android:orderInCategory="2"
         android:showAsAction="ifRoom|withText"
-        android:title="@string/action_settings"/>
+        android:title="@string/action_edit"/>
     <item
-        android:id="@+id/setting"
+        android:id="@+id/action_settings"
         android:icon="@drawable/ic_launcher"
         android:orderInCategory="3"
         android:showAsAction="ifRoom|withText"
@@ -24,6 +24,6 @@
         android:icon="@drawable/ic_launcher"
         android:orderInCategory="4"
         android:showAsAction="ifRoom|withText"
-        android:title="@string/action_settings"/>
+        android:title="@string/action_quit"/>
 
 </menu>

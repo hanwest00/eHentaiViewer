@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical" >
-    
+
     <com.handmark.pulltorefresh.library.PullToRefreshListView
         android:id="@+id/local_comic_list"
         android:layout_width="fill_parent"
@@ -11,8 +11,15 @@
         android:cacheColorHint="#00000000"
         android:divider="@null"
         android:dividerHeight="0dp"
-        android:fadingEdge="none" 
-        >
+        android:fadingEdge="none" >
     </com.handmark.pulltorefresh.library.PullToRefreshListView>
 
-</LinearLayout>
+    <Button
+        android:id="@+id/del_btn"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:visibility="gone"
+        android:layout_gravity="bottom"
+         />
+
+</FrameLayout>

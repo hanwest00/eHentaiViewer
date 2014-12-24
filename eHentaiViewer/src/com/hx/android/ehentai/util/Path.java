@@ -5,5 +5,5 @@ public class Path {
 			.getExternalStorageDirectory().toString();
 
 	public final static String LAZY_LOAD_PATH = String.format("%s%s", APP_STORAGE, "/eHentaiViewer/LazyLoad/");
-	public final static String CACHE_PATH = String.format("%s%s", APP_STORAGE, "/eHentaiViewer/Comic/");
+	public final static String COMIC_DIR = String.format("%s%s", APP_STORAGE, "/eHentaiViewer/Comic/");
 }

@@ -3,7 +3,11 @@ package com.hx.android.ehentai.util;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
+import java.nio.ByteBuffer;
+import java.nio.channels.FileChannel;
 
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -52,6 +56,10 @@ public class FileManager {
 				fullFileName.length());
 		return createFile(dir, fileName);
 	}
+	
+	public static File createFile(File file) {
+		return createFile(file.getAbsolutePath());
+	}
 
 	public static Bitmap convertToBitmap(String path) {
 		return convertToBitmap(path, 0, 0);
@@ -67,6 +75,23 @@ public class FileManager {
 			BitmapFactory.Options options1 = new BitmapFactory.Options();
 			options1.inSampleSize = computeSampleSize(options, -1, w * h);
 			ret = BitmapFactory.decodeFile(path, options1);
+
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		return ret;
+	}
+	
+	public static Bitmap convertToBitmap(byte[] content, int w, int h) {
+		Bitmap ret = null;
+		try {
+			BitmapFactory.Options options = new BitmapFactory.Options();
+			options.inJustDecodeBounds = true;
+			BitmapFactory.decodeByteArray(content, 0, content.length, options);
+
+			BitmapFactory.Options options1 = new BitmapFactory.Options();
+			options1.inSampleSize = computeSampleSize(options, -1, w * h);
+			ret = BitmapFactory.decodeByteArray(content, 0, content.length, options1);
 
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -108,6 +133,112 @@ public class FileManager {
 			return lowerBound;
 		} else {
 			return upperBound;
+		}
+	}
+
+	public static String readAllText(String path, String charset) {
+		return readAllText(new File(path), charset);
+	}
+
+	public static String readAllText(File file, String charset) {
+		String ret = null;
+
+		if (!file.exists())
+			return ret;
+
+		try {
+			FileInputStream inputStream = new FileInputStream(file);
+
+			byte[] buffer = new byte[(int) file.length()];
+
+			if (inputStream.read(buffer) > 0)
+				ret = new String(buffer, charset);
+
+			inputStream.close();
+		} catch (FileNotFoundException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+
+		return ret;
+	}
+
+	public static void writeAllText(File file, String content, String charset) {
+		try {
+			writeFile(file, content.getBytes(charset));
+		} catch (UnsupportedEncodingException e) {
+			e.printStackTrace();
+		}
+	}
+
+	public static void appendAllText(File file, String content, String charset) {
+		try {
+			appendFile(file, content.getBytes(charset));
+		} catch (UnsupportedEncodingException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	}
+
+	public static void writeFile(File file, byte[] content) {
+		try {
+			if(!file.exists()) createFile(file);
+			FileOutputStream outputStream = new FileOutputStream(file);
+			FileChannel fileChannel = outputStream.getChannel();
+			fileChannel.write(ByteBuffer.wrap(content), 0);
+			fileChannel.close();
+			outputStream.close();
+		} catch (FileNotFoundException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (UnsupportedEncodingException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	}
+	
+	public static void appendFile(File file, byte[] content) {
+		try {
+			if(!file.exists()) createFile(file);
+			FileOutputStream outputStream = new FileOutputStream(file);
+			FileChannel fileChannel = outputStream.getChannel();
+			fileChannel.write(ByteBuffer.wrap(content),
+					file.length());
+			fileChannel.close();
+			outputStream.close();
+		} catch (FileNotFoundException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (UnsupportedEncodingException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	}
+	
+	public static byte[] readAllBytes(File file){
+		try {
+			FileInputStream inputStream = new FileInputStream(file);
+			byte[] buffer = new byte[(int) file.length()];
+			inputStream.read(buffer);
+			inputStream.close();
+			return buffer;
+		} catch (FileNotFoundException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+			return null;
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+			return null;
 		}
 	}
 }
