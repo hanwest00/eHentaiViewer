@@ -119,6 +119,9 @@ public class LocalComicFragment extends Fragment implements IChangeData,
 	}
 
 	public void quitEdit() {
+		for (int i = 0; i < mListView.getChildCount();i++){
+			mListView.getChildAt(i).setBackgroundColor(Color.argb(0, 255, 255, 255));
+		}
 		mDelList.clear();
 		mDelBtn.setVisibility(View.GONE);
 		isEditMode = false;
@@ -164,5 +167,13 @@ public class LocalComicFragment extends Fragment implements IChangeData,
 		mComics = mComicMan.getLocalComic();
 		mAdapter.setData(mComics);
 		quitEdit();
+	}
+	
+	public boolean handleKeyBack(){
+		if(isEditMode){
+			quitEdit();
+			return true;
+		}
+		return false;
 	}
 }

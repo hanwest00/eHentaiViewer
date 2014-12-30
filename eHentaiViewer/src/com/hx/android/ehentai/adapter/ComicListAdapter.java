@@ -1,7 +1,9 @@
 package com.hx.android.ehentai.adapter;
 
 import java.text.DecimalFormat;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import com.hx.android.ehentai.R;
 import com.hx.android.ehentai.data.ComicManager;
@@ -19,14 +21,15 @@ import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
 
-public class ComicListAdapter extends BaseAdapter implements OnClickListener{
+public class ComicListAdapter extends BaseAdapter implements OnClickListener {
 	private List<Comic> mData;
 	private Context mContext;
-	private int mCurrentPosition;
+	private Map<Integer, String> mDownloadProcMap;
 
 	public ComicListAdapter(List<Comic> comics, Context context) {
 		mData = comics;
 		mContext = context;
+		mDownloadProcMap = new HashMap<Integer, String>();
 	}
 
 	public void setData(List<Comic> data) {
@@ -63,25 +66,28 @@ public class ComicListAdapter extends BaseAdapter implements OnClickListener{
 					.findViewById(R.id.comic_title);
 			viewHolder.downloadBtn = (Button) convertView
 					.findViewById(R.id.comic_btn);
-			
+
 			convertView.setTag(viewHolder);
 		} else
 			viewHolder = (ViewHolder) convertView.getTag();
-		
+
 		Comic comic = mData.get(position);
-		
-		if(ComicManager.hasDownloaded(comic))
-			viewHolder.downloadBtn.setVisibility(View.GONE);
-		else
-			viewHolder.downloadBtn.setVisibility(View.VISIBLE);
-		
-		mCurrentPosition = position;
+
 		LayoutParams lp = viewHolder.imageView.getLayoutParams();
 		viewHolder.imageView.setTag(comic.coverPath);
-		ImageLoader.getInstance().ShowImageAsync(viewHolder.imageView, comic.coverPath,
-				lp.width, lp.height);
+		ImageLoader.getInstance().ShowImageAsync(viewHolder.imageView,
+				comic.coverPath, lp.width, lp.height);
 		viewHolder.title.setText(comic.title);
-		viewHolder.downloadBtn.setOnClickListener(this);
+
+		if (ComicManager.hasDownloaded(comic))
+			viewHolder.downloadBtn.setVisibility(View.GONE);
+		else {
+			viewHolder.downloadBtn.setVisibility(View.VISIBLE);
+			viewHolder.downloadBtn.setTag(position);
+			viewHolder.downloadBtn.setOnClickListener(this);
+			String proc = mDownloadProcMap.get(position);
+			viewHolder.downloadBtn.setText(proc == null ? "Download" : proc);
+		}
 		return convertView;
 	}
 
@@ -92,38 +98,47 @@ public class ComicListAdapter extends BaseAdapter implements OnClickListener{
 	}
 
 	@Override
-	public void onClick(View v) {
+	public void onClick(final View v) {
 		// TODO Auto-generated method stub
+		final int position = (Integer) v.getTag();
+		mDownloadProcMap.put(position, "");
 		final Button obj = (Button) v;
-		final Comic currComic = mData.get(mCurrentPosition);
+		final Comic currComic = mData.get(position);
 		ComicManager comicMan = new ComicManager(mContext);
-		
-		obj.setText("Downloading...");
-		comicMan.setOnDownloadComic(new OnDownloadComic(){
+
+		obj.setText("Wait...");
+		comicMan.setOnDownloadComic(new OnDownloadComic() {
 			private DecimalFormat mDecimalFormat = new DecimalFormat("#.00");
 			private ComicManager mComicMan = new ComicManager(mContext);
-			
+
 			@Override
 			public void onStart() {
-				// TODO Auto-generated method stub
 			}
 
 			@Override
 			public void onProgress(int curr, int proc) {
-				// TODO Auto-generated method stub
-				obj.setText(mDecimalFormat.format(curr * 100 / proc));
+				final String procStr = mDecimalFormat.format(curr * 100 / proc);
+				mDownloadProcMap.put(position, procStr);
+				if ((Integer) obj.getTag() == position)
+					obj.post(new Runnable() {
+						@Override
+						public void run() {
+							obj.setText(procStr);
+						}
+					});
 			}
 
 			@Override
 			public void onEnd() {
-				// TODO Auto-generated method stub
+				mDownloadProcMap.remove(position);
 				obj.setText("");
 				obj.setVisibility(View.GONE);
 				mComicMan.addComicToDB(currComic);
+
 			}
-			
-		});	
-		
+
+		});
+
 		comicMan.downloadComicImages(currComic);
 	}
 }

@@ -32,6 +32,9 @@ public class WebManager {
 
 	public final static String E_HENTAI_LOFI_URL = "http://lofi.e-hentai.org/";
 	public final static String E_HENTAI_LOFI_CHINESE_URL = "http://lofi.e-hentai.org/?%s&f_search=chinese&f_sname=1&f_stags=1&f_apply=Apply+Filter";
+	public final static String E_HENTAI_LOFI_CHINESE_URL1 = "http://lofi.e-hentai.org/?%s&f_search=%%E6%%BC%%A2%%E5%%8C%%96&f_sname=1&f_stags=1&f_apply=Apply+Filter";
+	public final static String E_HENTAI_LOFI_CHINESE_URL2 = "http://lofi.e-hentai.org/?%s&f_search=%%E6%%B1%%89%%E5%%8C%%96&f_sname=1&f_stags=1&f_apply=Apply+Filter";
+	//public final static String E_HENTAI_LOFI_CHINESE_URL = "http://lofi.e-hentai.org/?%s&f_search=%%E6%%BC%%A2%%E5%%8C%%96+chinese+%%E6%%B1%%89%%E5%%8C%%96&f_sname=1&f_stags=1&f_apply=Apply+Filter";
 	public final static Pattern LIST_PATTERN = Pattern
 			.compile("(?<=<div class=\"ig\">)[\\S\\s]*?(?=</div>)");
 	public final static Pattern COVER_PATTERN = Pattern

@@ -26,6 +26,7 @@ import android.support.v7.app.ActionBar;
 import android.support.v7.app.ActionBar.Tab;
 import android.support.v7.app.ActionBar.TabListener;
 import android.support.v7.app.ActionBarActivity;
+import android.view.KeyEvent;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -45,6 +46,7 @@ public class MainActivity extends ActionBarActivity implements TabListener,
 	private ActionBar mActionBar;
 	private MenuItem mQuatilyItem;
 	private MenuItem mEditItem;
+	private int mCurrentTab;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -55,7 +57,8 @@ public class MainActivity extends ActionBarActivity implements TabListener,
 	}
 
 	private void initViews() {
-
+		mCurrentTab = 0;
+		
 		mActionBar = this.getSupportActionBar();
 		mActionBar.setNavigationMode(ActionBar.NAVIGATION_MODE_TABS);
 		mActionBar.setTitle("Comic");
@@ -86,6 +89,15 @@ public class MainActivity extends ActionBarActivity implements TabListener,
 	@Override
 	protected void onStart() {
 		super.onStart();
+	}
+	
+	@Override
+	public boolean onKeyUp(int keyCode, KeyEvent event){
+		if(keyCode == KeyEvent.KEYCODE_BACK && mCurrentTab == 0){
+			LocalComicFragment fragment = (LocalComicFragment) mSectionsPagerAdapter.getCurrentFragment1();
+			return fragment.handleKeyBack();
+		}
+		return false;
 	}
 
 	private void setOverflowShowingAlways() {
@@ -155,10 +167,10 @@ public class MainActivity extends ActionBarActivity implements TabListener,
 
 	@Override
 	public void onTabSelected(Tab arg0, FragmentTransaction arg1) {
-		// TODO Auto-generated method stub
+		mCurrentTab = arg0.getPosition();
 		if (mQuatilyItem == null)
 			return;
-		if (arg0.getPosition() == 1) {
+		if (mCurrentTab == 1) {
 			mQuatilyItem.setVisible(true);
 			mEditItem.setVisible(false);
 			OnlineComicFragment curr = (OnlineComicFragment) mSectionsPagerAdapter
